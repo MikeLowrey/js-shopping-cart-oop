@@ -17,7 +17,7 @@ To add increase, decrease, remove the quantity of an specific product you can im
         c.addItem(data.id, new_q);
     }
     
-   function removeItemFromBsketById(data) {        
+    function removeItemFromBsketById(data) {        
         c.deleteItemFromCart(data.dataset.id);
-   }
+    }
    
