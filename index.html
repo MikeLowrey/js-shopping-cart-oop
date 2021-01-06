@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0ed3cf">
+    <meta name="JS Cart Class" content="#f1f1f1">
+    <meta name="theme-color" content="#ccc">
+
+    <title>JS Shoping Cart</title>
+</head>
+  
+<body>
+    <div>Count Basket Items: <span id="myBasketBadge"></span></div>
+    <div>Price Sum: <span id="sum"></span></div>
+    <div>JSON<div id="json"></div>
+    <h6>Basket Listing</h6>
+    <div id="basketOverviewContainer"></div>
+    
+<script>
+    var myBasketCount = 0;
+    let pl = [
+        {
+            id: 1,
+            is_active: 1,
+            productName: 'Cinelli MX 1',
+            productBrand: 'Cinelli',
+            type: 'Racebike',
+            productColor: 'white',            
+            shopCurrency :'EUR',
+            productSize: "54|56|58|60", 
+            productPrice: "2100.00", 
+            productIsSale: '1',
+            productPriceSale: "1900.00", 
+            productPriceDiscount: "10%",
+            productArticleFlag: "SALE", 
+            productSizeAvailability: "54_0|56_0|58_1|60_0",
+            productRating: "5",
+            productTeaser: '1_1.jpeg',
+            productImages: ['1_2.jpg','1_3.jpg','1_4.jpg']
+        },    
+        {
+            id: 2,
+            is_active: 1,
+            productName: 'Veloheld Iron',
+            productBrand: 'Veloheld',
+            type: 'MTB',
+            productColor: 'blue',            
+            shopCurrency :'EUR',
+            productSize: "S|M|L|XL", 
+            productPrice: "2300.00", 
+            productIsSale: '0',
+            productArticleFlag: "NEW", 
+            productSizeAvailability: "S_0|M_0|L_1|XL_0",
+            productRating: "5",
+            productTeaser: '2_1.jpeg',
+            productImages: ['2_2.jpg','2_3.jpg','2_4.jpg']            
+        },        
+        {
+            id: 3,
+            is_active: 1,
+            productName: 'Butchers Mk-1',
+            productBrand: 'Butchers',
+            type: 'Cargobike',
+            productColor: 'white',            
+            shopCurrency :'EUR',
+            productSize: "One Size", 
+            productPrice: "7500.00", 
+            productIsSale: '0',
+            productArticleFlag: "HOT", 
+            productSizeAvailability: "One Size",
+            productRating: "4.5",
+            productTeaser: '3_1.jpeg',
+            productImages: ['3_2.jpg','3_3.jpg','3_4.jpg']
+        },          
+        {
+            id: 4,
+            is_active: 1,
+            productName: 'Colnago C64 Mapei',
+            productBrand: 'Colnago',
+            type: 'Racebike',
+            productColor: 'white',            
+            shopCurrency :'EUR',            
+            productSize: "S|M|L|XL", 
+            productPrice: "4500.00", 
+            productIsSale: '0',
+            productArticleFlag: "HOT", 
+            productSizeAvailability: "M",
+            productRating: "5",
+            productTeaser: '4_1.jpeg',
+            productImages: ['4_1.jpg']
+        },          
+        {
+            id: 5,
+            is_active: 1,
+            productName: 'R&M Load 70',
+            productBrand: 'Riese & Müller',
+            type: 'Cargobike',
+            productColor: 'white',            
+            shopCurrency :'EUR',            
+            productSize: "One Size", 
+            productPrice: "7500.00", 
+            productIsSale: '0',
+            productArticleFlag: "HOT", 
+            productSizeAvailability: "One Size",
+            productRating: "5",
+            productTeaser: '5_1.jpeg',
+            productImages: ['5_1.jpg']
+        },                  
+    ];
+    
+
+// cartlist
+
+    "use strict";
+    class Cart {
+        constructor(cart_name) {
+            this._cart_name = cart_name;                    
+            this._cart;
+            this.init();            
+        }
+
+        init() 
+        {
+            let _storage = localStorage.getItem(this.cart_name);
+            if (_storage === null) 
+            {
+                // create new basket Element with an empty array                
+                localStorage.setItem(this.cart_name, JSON.stringify([]));
+            }  
+            this._cart = JSON.parse(localStorage.getItem(this.cart_name));          
+            this.refreshViewPoints();           
+        }
+
+        get cart_name() {
+            return this._cart_name;
+        }
+        set cart_name(value) {
+            this._cart_name = value;
+        }
+
+        get cart() {
+            return this._cart;
+        }
+
+        getCart() {
+            return (this.cart);
+        }
+
+        deleteWholeCart() {
+            this._cart = null;          
+            localStorage.removeItem(this.cart_name);
+            this.init();
+        }
+
+        addItem(id ,q = "1") {
+            id = String(id);
+            q = String(q);
+            console.log("addItems " + id +" with "+ q)
+            // check if item_id allready exists and modify cart item or create new cart item
+            let is_new = true;
+            for (let i=0; i < this._cart.length; i++) {
+                if (this._cart[i].product_id === id) {
+                    this._cart[i].q = q;
+                    is_new = false;
+                }
+            }   
+
+            if (is_new === true) {              
+                this._cart.push( {"product_id":id, "q":q} );   
+            }
+            
+            this.saveCart();
+            this.refreshViewPoints();
+        }
+
+        saveCart() {
+            let _storage = localStorage.getItem(this.cart_name);            
+
+            localStorage.setItem(this.cart_name, JSON.stringify(this._cart));           
+            this._cart = JSON.parse(localStorage.getItem(this.cart_name));          
+        }
+
+        refreshViewPoints() {            
+            document.getElementById("myBasketBadge").innerHTML = this.getCart().length;
+            myBasketCount = this.getCart().length;
+            document.getElementById("sum").innerHTML = this.calculateCartSum();
+            this.renderBasketOverview();
+            document.getElementById("json").innerHTML = JSON.stringify(this.getCart());
+        }
+
+        calculateCartSum() {   
+            if(this.cart.length === 0) {
+                return 0;
+            }
+            
+            let sum = this._cart.map((item) => {
+
+                let item_data = pl.filter(function(pl_item) {
+                    return pl_item.id == item.product_id
+                });
+
+                return (item.q * item_data[0].productPrice);
+            });
+            console.log(sum);
+            return sum.reduce(function(a, b){
+                    return a + b;
+            }, 0);                      
+        }
+
+        deleteItemFromCart(id) {
+            this._cart = this._cart.filter(function(item) {
+                return item.product_id !== id
+            });         
+            this.saveCart();
+            this.refreshViewPoints();           
+        }
+
+        renderBasketOverview() {    
+            this.renderBasketContainer();            
+        }
+
+        renderBasketContainer() {
+            let container = document.getElementById("basketOverviewContainer");                     
+            container.innerHTML = '';
+            let tbl  = document.createElement('table');
+            tbl.style.width  = '100px';
+
+            tbl.style.border = '1px solid black';           
+            for(let i = 0; i < this.getCart().length; i++){
+                let tr = tbl.insertRow();
+                let td = tr.insertCell();
+                let str = "id:" +this.getCart()[i].product_id + " q:" + this.getCart()[i].q;
+                td.appendChild(document.createTextNode(str));
+                td.style.border = '1px solid black';                
+            }
+            container.appendChild(tbl);                  
+        }       
+    }
+
+
+    let c = new Cart("mybasket");
+    c.addItem(pl[0].id,1);
+    console.log('1. get Items: ',c.getCart());
+    c.addItem(pl[0].id,1);
+    console.log('2. get Items: ',c.getCart());
+    c.addItem(pl[1].id,1);
+    console.log('3. get Items: ',c.getCart());    
+    console.log('4. remove Item', c.deleteItemFromCart(1));
+
+
+</script>
+
+</body>
+</html>
